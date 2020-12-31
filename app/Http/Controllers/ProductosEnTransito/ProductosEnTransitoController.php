@@ -8,6 +8,7 @@ use App\Events\ReIngresarStockEvent;
 use App\Helpers\Validaciones;
 use App\Http\Controllers\Controller;
 use App\Modelos\ProductosEnTrancito\Bodeprod;
+use App\Modelos\ProductosEnTrancito\Productos;
 use App\Modelos\ProductosEnTrancito\codigos_cajas;
 use App\Modelos\ProductosEnTrancito\productosEnTrancito;
 use App\Modelos\ProductosEnTrancito\ProductosVista;
@@ -42,17 +43,51 @@ class ProductosEnTransitoController extends Controller
             if ($codigo == "0" || $barra == "0" || $descripcion == "0") {
             } else {
 
-                $productos = ProductosVista::SelectQuitarPrecio()->codigo($codigo)
+                $productosCompararBodega = Productos::codigo($codigo)
                     ->CodigoBarra($barra)
                     ->Descripcion($descripcion)
                     ->get();
 
-                $data = [
-                    "status" => "success",
-                    "code" => 200,
-                    "producto" => $productos,
+                $bodega = Bodeprod::where('bpprod', $productosCompararBodega[0]->ARCODI)->first();
 
-                ];
+                $productos = Productos::SelectItems()->codigo($codigo)
+                ->CodigoBarra($barra)
+                ->Descripcion($descripcion)
+                ->get();
+
+                if ($bodega) {
+
+                    $data = [
+                        "status" => "success",
+                        "code" => 200,
+                        "producto" => $productos,
+
+                    ];
+
+
+
+                }else{
+                    $data = [
+                        "status" => "error",
+                        "code" => 400,
+                        "producto" => 'producto no activo ',
+
+                    ];
+
+
+                }
+
+
+                //
+
+
+                /*
+                $productos = ProductosVista::SelectQuitarPrecio()->codigo($codigo)
+                    ->CodigoBarra($barra)
+                    ->Descripcion($descripcion)
+                    ->get();
+*/
+
             }
         }
 
